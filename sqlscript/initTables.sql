@@ -1,0 +1,33 @@
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(50) NOT NULL,
+  password VARCHAR(50) NOT NULL,
+  email VARCHAR(256) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS finance_records (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(256) NOT NULL,
+  category VARCHAR(256) NOT NULL,
+  currency VARCHAR(256) NOT NULL,
+  amount FLOAT NOT NULL,
+  year INT NOT NULL,
+  month INT NOT NULL,
+  tags VARCHAR(256)[] NOT NULL,
+  remarks VARCHAR(256),
+  updatedDate DATE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS finance_category (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(256) NOT NULL,
+  remarks VARCHAR(256),
+  createdAt VARCHAR(256) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS finance_tags (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(256) NOT NULL,
+  remarks VARCHAR(256),
+  createdAt DATE NOT NULL
+);

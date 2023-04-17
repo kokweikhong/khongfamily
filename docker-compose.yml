@@ -1,0 +1,52 @@
+version: '3'
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - backend
+      - reverse-proxy
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - DB_HOST=database
+      - DB_PORT=5432
+      - DB_USER=khongadmin
+      - DB_PASSWORD=khong1314Family
+      - DB_NAME=khongfamily
+    depends_on:
+      - database
+  database:
+    image: postgres
+    container_name: khongfamily_database
+    environment:
+      - POSTGRES_USER=khongadmin
+      - POSTGRES_PASSWORD=khong1314Family
+      - POSTGRES_DB=khongfamily
+    volumes:
+      - ./sqlscript/initUser.sql:/docker-entrypoint-initdb.d/initUser.sql
+      - ./sqlscript/initTables.sql:/docker-entrypoint-initdb.d/initTables.sql
+      - ./database:/var/lib/postgresql/data
+  reverse-proxy:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+    depends_on:
+      - frontend
+      - backend
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8081:8080
