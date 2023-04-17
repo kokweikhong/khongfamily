@@ -2,15 +2,16 @@ version: '3'
 services:
   frontend:
     build: ./frontend
+    container_name: khongfamily_frontend
     ports:
       - "3000:3000"
     volumes:
       - ./frontend:/app
     environment:
       - NODE_ENV=development
-    depends_on:
-      - backend
-      - reverse-proxy
+    # depends_on:
+    #   - backend
+      # - reverse-proxy
   backend:
     build: ./backend
     ports:
