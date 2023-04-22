@@ -1,3 +1,45 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-md text-sm font-medium bg-primary text-white;
+  }
+}
+
+body {
+  font-weight: 300;
+  color: #2c2c2c;
+}
+
+h1 {
+  font-size: 1.802rem;
+  font-weight: 900;
+}
+
+h2 {
+  font-size: 1.602rem;
+  font-weight: 800;
+}
+
+h3 {
+  font-size: 1.424rem;
+  font-weight: 700;
+}
+
+h4 {
+  font-size: 1.266rem;
+  font-weight: 600;
+}
+
+h5 {
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+button, a {
+  font-weight: 400;
+}
+
+small, .text_small {font-size: 0.889rem;}

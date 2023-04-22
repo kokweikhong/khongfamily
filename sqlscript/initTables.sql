@@ -9,14 +9,14 @@ CREATE TABLE IF NOT EXISTS finance_category (
   id SERIAL PRIMARY KEY,
   name VARCHAR(256) NOT NULL,
   remarks VARCHAR(256),
-  createdAt VARCHAR(256) NOT NULL
+  created_at TIMESTAMP NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS finance_tags (
   id SERIAL PRIMARY KEY,
   name VARCHAR(256) NOT NULL,
   remarks VARCHAR(256),
-  createdAt DATE NOT NULL
+  created_at TIMESTAMP NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS finance_records (
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS finance_records (
   month INT NOT NULL,
   tags VARCHAR(256)[] NOT NULL,
   remarks VARCHAR(256),
-  updatedDate DATE NOT NULL,
+  created_at TIMESTAMP NOT NULL,
   FOREIGN KEY (category_id) REFERENCES finance_category (id)
 );
 

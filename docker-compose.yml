@@ -9,15 +9,18 @@ services:
       - ./frontend:/app
     environment:
       - NODE_ENV=development
-    # depends_on:
-    #   - backend
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+
+    depends_on:
+      - backend
       # - reverse-proxy
   backend:
     build: ./backend
+    container_name: khongfamily_backend
     ports:
-      - "5000:5000"
-    volumes:
-      - ./backend:/app
+      - "8080:8080"
+    # volumes:
+    #   - ./backend:/app
     environment:
       - DB_HOST=database
       - DB_PORT=5432
@@ -37,15 +40,15 @@ services:
       - ./sqlscript/initUser.sql:/docker-entrypoint-initdb.d/initUser.sql
       - ./sqlscript/initTables.sql:/docker-entrypoint-initdb.d/initTables.sql
       - ./database:/var/lib/postgresql/data
-  reverse-proxy:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx:/etc/nginx/conf.d
-    depends_on:
-      - frontend
-      - backend
+  # reverse-proxy:
+  #   image: nginx:alpine
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - ./nginx:/etc/nginx/conf.d
+  #   depends_on:
+  #     - frontend
+  #     - backend
   adminer:
     image: adminer
     restart: always
