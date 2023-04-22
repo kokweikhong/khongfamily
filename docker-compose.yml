@@ -40,15 +40,6 @@ services:
       - ./sqlscript/initUser.sql:/docker-entrypoint-initdb.d/initUser.sql
       - ./sqlscript/initTables.sql:/docker-entrypoint-initdb.d/initTables.sql
       - ./database:/var/lib/postgresql/data
-  # reverse-proxy:
-  #   image: nginx:alpine
-  #   ports:
-  #     - "80:80"
-  #   volumes:
-  #     - ./conf.d:/etc/nginx/conf.d
-  #   depends_on:
-  #     - frontend
-  #     - backend
   adminer:
     image: adminer
     restart: always
