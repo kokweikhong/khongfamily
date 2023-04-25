@@ -27,8 +27,9 @@ const Page: NextPage = () => {
       });
   }, []);
   return (
-    <div>
-      <h1>Category</h1>
+    <div className="container mx-auto">
+      <h2 className="m-4">Category Page</h2>
+      <h3 className="mx-4">{`Total ${categories.length} items`}</h3>
 
       {/* button to create new category */}
       <div className="m-4">
@@ -51,7 +52,7 @@ const Page: NextPage = () => {
 
       {/* list of categories */}
       <div>
-        <ul>
+        <ul className="grid grid-cols-1 gap-1 max-w-[500px]">
           {categories.map((category) => (
             <li key={category.id} className="p-4 flex flex-col gap-1 border-b border-b-primary">
               <div><h3>{category.name}</h3></div>

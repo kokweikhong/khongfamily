@@ -10,7 +10,6 @@ export default function Home() {
       .then((data) => console.log(data))
   }, [])
 
-  console.log(process.env.API_BASE_URL)
   return (
     <main>
       <div>Khong Family</div>
