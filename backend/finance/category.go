@@ -92,7 +92,8 @@ func (s *CategoryServer) List(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	// iterate over the rows
-	var categories []Category
+	// var categories []Category
+    var categories = make([]Category, 0)
 	for rows.Next() {
 		var c Category
 		if err := rows.Scan(&c.ID, &c.Name, &c.Remarks, &c.CreatedAt); err != nil {
@@ -107,7 +108,8 @@ func (s *CategoryServer) List(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// write the response
-	if err := json.NewEncoder(w).Encode(categories); err != nil {
+
+	if err := WriteJSON(w, http.StatusOK, categories); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }

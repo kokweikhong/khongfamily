@@ -3,6 +3,7 @@ package finance
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"regexp"
@@ -12,16 +13,17 @@ import (
 )
 
 type Record struct {
-	Id         int            `json:"id"`
-	Name       string         `json:"name"`
-	CategoryId int            `json:"category_id"`
-	Currency   string         `json:"currency"`
-	Amount     float64        `json:"amount"`
-	Year       int            `json:"year"`
-	Month      int            `json:"month"`
-	Tags       pq.StringArray `json:"tags"`
-	Remarks    string         `json:"remarks"`
-	CreatedAt  time.Time      `json:"created_at"`
+	Id           int            `json:"id"`
+	Name         string         `json:"name"`
+	CategoryId   int            `json:"category_id"`
+	CategoryName string         `json:"category_name"`
+	Currency     string         `json:"currency"`
+	Amount       float64        `json:"amount"`
+	Year         int            `json:"year"`
+	Month        int            `json:"month"`
+	Tags         pq.StringArray `json:"tags"`
+	Remarks      string         `json:"remarks"`
+	CreatedAt    time.Time      `json:"created_at"`
 }
 
 type RecordServer struct {
@@ -76,20 +78,57 @@ func (s *RecordServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // List returns a list of records.
 func (s *RecordServer) List(w http.ResponseWriter, r *http.Request) {
+	log.Println("List")
 	// query records from database
+	// SELECT finance_records.id, finance_records.amount, categories.name
+	// FROM finance_records
+	// JOIN categories ON finance_records.category_id = categories.id;
+	// rows, err := s.db.Query(
+	// 	`SELECT id, name, category_id, currency, amount, year, month, tags, remarks, created_at
+	//        FROM finance_records`)
+
+	// rows, err := s.db.Query(
+	// 	`SELECT id, name, finance_category.name, currency, amount, year, month, tags, remarks, created_at
+	//        FROM finance_records JOIN finance_category on finance_records.category_id = finance_category.id`)
 	rows, err := s.db.Query(
-		`SELECT id, name, category_id, currency, amount, year, month, tags, remarks, created_at 
-        FROM finance_records`)
+		`SELECT
+	       r.id,
+	       r.name,
+           c.id,
+	       c.name,
+	       r.currency,
+	       r.amount,
+	       r.year,
+	       r.month,
+	       r.tags,
+	       r.remarks,
+	       r.created_at 
+           FROM finance_records r JOIN finance_category c on r.category_id = c.id`)
+	// rows, err := s.db.Query(
+	// 	`SELECT
+	//        id,
+	//        name,
+	//        category_id,
+	//        category_name,
+	//        currency,
+	//        amount,
+	//        year,
+	//        month,
+	//        tags,
+	//        remarks,
+	//        created_at FROM finance_records`)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
 
-	records := []Record{}
+	// records := []Record{}
+	records := make([]Record, 0)
 	for rows.Next() {
 		record := Record{}
-		err := rows.Scan(&record.Id, &record.Name, &record.CategoryId, &record.Currency, &record.Amount, &record.Year, &record.Month, &record.Tags, &record.Remarks, &record.CreatedAt)
+		fmt.Println(rows)
+		err := rows.Scan(&record.Id, &record.Name, &record.CategoryId, &record.CategoryName, &record.Currency, &record.Amount, &record.Year, &record.Month, &record.Tags, &record.Remarks, &record.CreatedAt)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -115,10 +154,10 @@ func (s *RecordServer) Get(w http.ResponseWriter, r *http.Request) {
 
 	// query record from database
 	row := s.db.QueryRow(
-		`SELECT id, name, category_id, currency, amount, year, month, tags, remarks, created_at 
+		`SELECT id, name, category_id, category_name, currency, amount, year, month, tags, remarks, created_at 
         FROM finance_records WHERE id = $1`, id)
 	record := Record{}
-	err := row.Scan(&record.Id, &record.Name, &record.CategoryId, &record.Currency, &record.Amount, &record.Year, &record.Month, &record.Tags, &record.Remarks, &record.CreatedAt)
+	err := row.Scan(&record.Id, &record.Name, &record.CategoryId, &record.CategoryName, &record.Currency, &record.Amount, &record.Year, &record.Month, &record.Tags, &record.Remarks, &record.CreatedAt)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -141,14 +180,18 @@ func (s *RecordServer) Create(w http.ResponseWriter, r *http.Request) {
 
 	record.CreatedAt = time.Now()
 
-	// insert the record into database
+	// insert the record into database, category_id is a foreign key
 	_, err := s.db.Exec(
-		`INSERT INTO finance_records (name, category_id, currency, amount, year, month, tags, remarks, created_at) 
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`, record.Name, record.CategoryId, record.Currency, record.Amount, record.Year, record.Month, record.Tags, record.Remarks, record.CreatedAt)
+		`INSERT INTO finance_records (name, category_id, currency,
+        amount, year, month, tags, remarks, created_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+		record.Name, record.CategoryId, record.Currency,
+		record.Amount, record.Year, record.Month, record.Tags, record.Remarks, record.CreatedAt)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 }
 
 // Update updates a record.
@@ -164,8 +207,11 @@ func (s *RecordServer) Update(w http.ResponseWriter, r *http.Request) {
 
 	// update the record in database
 	_, err := s.db.Exec(
-		`UPDATE finance_records SET name=$1, category_id=$2, currency=$3, amount=$4, year=$5, month=$6, tags=$7, remarks=$8 
-        WHERE id=$9`, record.Name, record.CategoryId, record.Currency, record.Amount, record.Year, record.Month, record.Tags, record.Remarks, record.Id)
+		`UPDATE finance_records SET name=$1, category_id=$2, category_name=$3, 
+        currency=$4, amount=$5, year=$6, month=$7, tags=$8, remarks=$9 
+        WHERE id=$10`,
+		record.Name, record.CategoryId, record.CategoryName,
+		record.Currency, record.Amount, record.Year, record.Month, record.Tags, record.Remarks, record.Id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

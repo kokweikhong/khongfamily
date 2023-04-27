@@ -1,19 +1,29 @@
-import { ICategory, ICategoryFormProps } from '@/types/finance/category';
+"use client";
+
+import { ICategory } from '@/types/finance/category';
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation'
+import { ITag } from '@/types/finance/tag';
+import { API_URL } from '@/types/api';
 
-const CategoryForm: React.FC<ICategoryFormProps> = (
-  { data, action, setShowForm }
+type Props = {
+  formType: 'category' | 'tag'
+  data: ICategory | ITag
+  method: 'create' | 'update' | 'delete'
+};
+
+const CategoryForm: React.FC<Props> = (
+  { formType, data, method }
 ) => {
   const router = useRouter();
-  const { register, reset, handleSubmit, formState: { errors } } = useForm<ICategory>({
+  const { register, reset, handleSubmit, formState: { errors } } = useForm<ICategory | ITag>({
     defaultValues: data
   });
 
   const [requestURL, setRequestURL] = React.useState<string>('');
 
-  const handleRequest = async (formData: ICategory) => {
+  async function handleRequest(formData: ICategory) {
     try {
       formData.created_at = new Date().toISOString();
       const response = await fetch(requestURL, {
@@ -28,7 +38,6 @@ const CategoryForm: React.FC<ICategoryFormProps> = (
     } catch (error) {
       console.log(error);
     } finally {
-      setShowForm(false);
       router.refresh();
     }
   };
@@ -37,21 +46,28 @@ const CategoryForm: React.FC<ICategoryFormProps> = (
   const onSubmit = handleSubmit((formData) => {
     handleRequest(formData);
   });
-  // firstName and lastName will have correct type
-  //
+
   useEffect(() => {
-    switch (action) {
+    let baseURL = { create: '', update: '', delete: '' };
+    switch (formType) {
+
+      case 'category':
+        baseURL = API_URL.finance.category
+      case 'tag':
+        baseURL = API_URL.finance.tag
+    }
+    switch (method) {
       case 'create':
         reset();
-        setRequestURL(`${process.env.NEXT_PUBLIC_API_URL}/finance/category/create/`);
+        setRequestURL(baseURL.create);
         break;
       case 'update':
         reset(data);
-        setRequestURL(`${process.env.NEXT_PUBLIC_API_URL}/finance/category/update/`);
+        setRequestURL(baseURL.update);
         break;
       case 'delete':
         reset(data);
-        setRequestURL(`${process.env.NEXT_PUBLIC_API_URL}/finance/category/delete/`);
+        setRequestURL(baseURL.delete);
         break;
       default:
         break;
@@ -60,7 +76,7 @@ const CategoryForm: React.FC<ICategoryFormProps> = (
 
   return (
     <form onSubmit={onSubmit} className='max-w-[450px] mx-auto p-4 mt-4'>
-      <h2 className='mb-6 capitalize'>{`Category Form (${action})`}</h2>
+      <h2 className='mb-6 capitalize'>{`${formType.toUpperCase()} Form (${method})`}</h2>
       <div className='w-full flex flex-col gap-4 justify-center'>
         <div className='flex flex-col gap-1'>
           <label>Category Name</label>
@@ -82,14 +98,7 @@ const CategoryForm: React.FC<ICategoryFormProps> = (
             type="submit"
             className='bg-blue-500 font-medium uppercase rounded-md px-4 py-2'
           >
-            {`${action}`}
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowForm(false)}
-            className='bg-red-500 font-medium uppercase rounded-md px-4 py-2'
-          >
-            close
+            {`${method.toUpperCase()}`}
           </button>
         </div>
       </div>

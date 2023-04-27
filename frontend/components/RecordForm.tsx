@@ -1,9 +1,11 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { IRecord } from '@/types/finance/record';
+import { ICategory } from '@/types/finance/category';
 import { useForm } from 'react-hook-form';
 import { months } from '@/types/months';
+import { API_URL } from '@/types/api';
 
 type Props = {
   record: IRecord;
@@ -11,17 +13,48 @@ type Props = {
 };
 
 const RecordForm: React.FC<Props> = ({ record, method }) => {
-  const [tag, setTag] = React.useState<string>('');
+  const [requestURL, setRequestURL] = useState<string>('');
+  const [tag, setTag] = useState<string>('');
+  const [categories, setCategories] = useState<ICategory[]>([]);
   const years = [2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030]
 
-  const { register, handleSubmit, formState: { errors }, reset } = useForm({
+  useEffect(() => {
+    fetch(API_URL.finance.category.get)
+      .then((res) => res.json())
+      .then((data) => {
+        setCategories(data);
+      });
+
+    // set request url
+    switch (method) {
+      case 'create':
+        setRequestURL(API_URL.finance.record.create)
+        break;
+      case 'update':
+        setRequestURL(API_URL.finance.record.update)
+        break;
+      case 'delete':
+        setRequestURL(API_URL.finance.record.delete)
+        break;
+    }
+  }, []);
+
+  const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm({
     defaultValues: {
       ...record,
     },
   })
 
-  function handleFormSubmit(data: IRecord) {
-    console.log(data);
+  async function handleFormSubmit(data: IRecord) {
+    console.log(data)
+    data.created_at = new Date().toISOString()
+    await fetch(requestURL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
   }
 
   function handleAddTag() {
@@ -36,16 +69,15 @@ const RecordForm: React.FC<Props> = ({ record, method }) => {
     reset(record)
   }
 
-  // id: number;
-  // name: string;
-  // category_id: number;
-  // currency: string;
-  // amount: number;
-  // year: number;
-  // month: number;
-  // tags?: string[];
-  // remarks: string;
-  // created_at: string;
+  function handleCategoryChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    console.log(e.target.value)
+    const findCategory = categories.find((category) => category.id === Number(e.target.value))
+    console.log(findCategory)
+    if (findCategory) {
+      setValue('category_name', findCategory.name)
+    }
+  }
+
   return (
     <div className='max-w-[500px] mx-auto'>
       <form onSubmit={handleSubmit(handleFormSubmit)} className='w-full flex flex-col gap-3'>
@@ -56,9 +88,10 @@ const RecordForm: React.FC<Props> = ({ record, method }) => {
 
         <div className='flex flex-col gap-1'>
           <label>Category</label>
-          <select {...register("category_id")} className='rounded-md border border-primary p-2'>
-            {months.map((month) => (
-              <option key={month.id} value={month.id}>{month.name}</option>
+          <select {...register("category_id", { valueAsNumber: true })} onChange={(e) => handleCategoryChange(e)} className='rounded-md border border-primary p-2'>
+            <option value="">Please Select Category</option>
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>{category.name}</option>
             ))}
           </select>
         </div>
@@ -74,7 +107,7 @@ const RecordForm: React.FC<Props> = ({ record, method }) => {
 
         <div className='flex flex-col gap-1'>
           <label>Amount</label>
-          <input type="number" {...register("amount")} className='rounded-md border border-primary p-2' />
+          <input type="number" step={0.01} {...register("amount", { valueAsNumber: true })} className='rounded-md border border-primary p-2' />
         </div>
 
         <div className='flex flex-col gap-1'>
@@ -88,7 +121,7 @@ const RecordForm: React.FC<Props> = ({ record, method }) => {
 
         <div className='flex flex-col gap-1'>
           <label>Month</label>
-          <select {...register("category_id", { valueAsNumber: true })} className='rounded-md border border-primary p-2'>
+          <select {...register("month", { valueAsNumber: true })} className='rounded-md border border-primary p-2'>
             {months.map((month) => (
               <option key={month.id} value={month.id}>{month.name}</option>
             ))}

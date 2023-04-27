@@ -7,8 +7,3 @@ export interface ICategory {
   created_at: string;
 }
 
-export interface ICategoryFormProps {
-  data: ICategory;
-  action: 'create' | 'update' | 'delete';
-  setShowForm: Dispatch<SetStateAction<boolean>>;
-}
