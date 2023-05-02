@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -36,7 +37,7 @@ var (
 
 	categoryUpdateRE = regexp.MustCompile(`^/finance/category/update[\/]*$`)
 
-	categoryDeleteRE = regexp.MustCompile(`^/finance/category/delete[\/]*$`)
+	categoryDeleteRE = regexp.MustCompile(`^/finance/category/delete/([0-9]+)[\/]*$`)
 )
 
 // ServeHTTP implements http.Handler.
@@ -52,9 +53,6 @@ func (s *CategoryServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
-	// w.Header().Set("Access-Control-Allow-Methods", "GET, POST")
-	// w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-
 	switch {
 	case r.Method == "GET" && categoryListRE.MatchString(r.URL.Path):
 		log.Println("categoryListRE")
@@ -91,9 +89,7 @@ func (s *CategoryServer) List(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	// iterate over the rows
-	// var categories []Category
-    var categories = make([]Category, 0)
+	var categories = make([]Category, 0)
 	for rows.Next() {
 		var c Category
 		if err := rows.Scan(&c.ID, &c.Name, &c.Remarks, &c.CreatedAt); err != nil {
@@ -108,10 +104,9 @@ func (s *CategoryServer) List(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// write the response
-
-	if err := WriteJSON(w, http.StatusOK, categories); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+    if err := json.NewEncoder(w).Encode(categories); err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+    }
 }
 
 // returns a single category
@@ -150,10 +145,11 @@ func (s *CategoryServer) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c.CreatedAt = time.Now()
+	c.Name = strings.Title(c.Name)
 
 	// check if the category already exists
 	var id int
-	if err := s.db.QueryRow(`SELECT id FROM finance_category WHERE name=$1`, c.Name).Scan(&id); err != sql.ErrNoRows {
+	if err := s.db.QueryRow(`SELECT id FROM finance_category WHERE LOWER(name)=LOWER($1)`, c.Name).Scan(&id); err != sql.ErrNoRows {
 		http.Error(w, "Category already exists", http.StatusBadRequest)
 		return
 	}
@@ -187,6 +183,7 @@ func (s *CategoryServer) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c.CreatedAt = time.Now()
+	c.Name = strings.Title(c.Name)
 
 	// update the category in the database
 	if _, err := s.db.Exec(`UPDATE finance_category SET name=$1, remarks=$2 WHERE id=$3`, c.Name, c.Remarks, c.ID); err != nil {
@@ -204,19 +201,30 @@ func (s *CategoryServer) Update(w http.ResponseWriter, r *http.Request) {
 
 // delete a category.
 func (s *CategoryServer) Delete(w http.ResponseWriter, r *http.Request) {
-	var c Category
-	if err := json.NewDecoder(r.Body).Decode(&c); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+
+	matches := categoryDeleteRE.FindStringSubmatch(r.URL.Path)
+	if len(matches) != 2 {
+		http.Error(w, "Invalid category id", http.StatusBadRequest)
 		return
 	}
+	id := matches[1]
+	// var c Category
+	// if err := json.NewDecoder(r.Body).Decode(&c); err != nil {
+	// 	http.Error(w, err.Error(), http.StatusBadRequest)
+	// 	return
+	// }
 
 	// delete the category from the database
-	if _, err := s.db.Exec(`DELETE FROM finance_category WHERE id=$1`, c.ID); err != nil {
+	if _, err := s.db.Exec(`DELETE FROM finance_category WHERE id=$1`, id); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	if err := WriteJSON(w, http.StatusOK, c.ID); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+    // write the response
+    w.Header().Set("Content-Type", "application/json; charset=utf-8")
+    w.WriteHeader(http.StatusOK)
+    if err := json.NewEncoder(w).Encode(id); err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+    }
+
 }

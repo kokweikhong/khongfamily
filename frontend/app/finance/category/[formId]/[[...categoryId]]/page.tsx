@@ -4,24 +4,54 @@ import { ICategory } from '@/types/finance/category';
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation'
-import { ITag } from '@/types/finance/tag';
 import { API_URL } from '@/types/api';
 
-type Props = {
-  formType: 'category' | 'tag'
-  data: ICategory | ITag
-  method: 'create' | 'update' | 'delete'
+type PageProps = {
+  params: {
+    formId: string;
+    categoryId: string[];
+  }
 };
 
-const CategoryForm: React.FC<Props> = (
-  { formType, data, method }
-) => {
+const CategoryForm: React.FC<PageProps> = ({ params }) => {
+  const { formId, categoryId } = params;
+  if (formId !== 'create' && formId !== 'update' && formId !== 'delete') return <div>404</div>
+  const [data, setData] = React.useState<ICategory>();
+  const [requestURL, setRequestURL] = React.useState<string>('');
   const router = useRouter();
-  const { register, reset, handleSubmit, formState: { errors } } = useForm<ICategory | ITag>({
+  const { register, reset, handleSubmit, formState: { errors } } = useForm<ICategory>({
     defaultValues: data
   });
 
-  const [requestURL, setRequestURL] = React.useState<string>('');
+
+  useEffect(() => {
+    switch (formId) {
+      case 'create':
+        setRequestURL(API_URL.finance.category.create ?? '');
+        break;
+      case 'update':
+        setRequestURL(API_URL.finance.category.update ?? '');
+        break;
+      case 'delete':
+        setRequestURL(`${API_URL.finance.category.delete}/${categoryId[0]}` ?? '');
+        break;
+      default:
+        break;
+    }
+    if (formId === 'update' || formId === 'delete') {
+      handleGetCategory(parseInt(categoryId[0]));
+    }
+  }, []);
+
+  useEffect(() => {
+    reset(data);
+  }, [data]);
+
+  async function handleGetCategory(id: number) {
+    const response = await fetch(`${API_URL.finance.category.get}${id}`);
+    const data = await response.json();
+    setData(data);
+  }
 
   async function handleRequest(formData: ICategory) {
     try {
@@ -38,45 +68,18 @@ const CategoryForm: React.FC<Props> = (
     } catch (error) {
       console.log(error);
     } finally {
-      router.refresh();
+      router.push('/finance/category');
+
     }
   };
-
 
   const onSubmit = handleSubmit((formData) => {
     handleRequest(formData);
   });
 
-  useEffect(() => {
-    let baseURL = { create: '', update: '', delete: '' };
-    switch (formType) {
-
-      case 'category':
-        baseURL = API_URL.finance.category
-      case 'tag':
-        baseURL = API_URL.finance.tag
-    }
-    switch (method) {
-      case 'create':
-        reset();
-        setRequestURL(baseURL.create);
-        break;
-      case 'update':
-        reset(data);
-        setRequestURL(baseURL.update);
-        break;
-      case 'delete':
-        reset(data);
-        setRequestURL(baseURL.delete);
-        break;
-      default:
-        break;
-    }
-  }, [data]);
-
   return (
     <form onSubmit={onSubmit} className='max-w-[450px] mx-auto p-4 mt-4'>
-      <h2 className='mb-6 capitalize'>{`${formType.toUpperCase()} Form (${method})`}</h2>
+      <h2 className='mb-6 capitalize'>{`Category Form (${formId.toUpperCase()})`}</h2>
       <div className='w-full flex flex-col gap-4 justify-center'>
         <div className='flex flex-col gap-1'>
           <label>Category Name</label>
@@ -98,7 +101,7 @@ const CategoryForm: React.FC<Props> = (
             type="submit"
             className='bg-blue-500 font-medium uppercase rounded-md px-4 py-2'
           >
-            {`${method.toUpperCase()}`}
+            {`${formId.toUpperCase()}`}
           </button>
         </div>
       </div>

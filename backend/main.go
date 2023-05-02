@@ -40,11 +40,9 @@ func main() {
 	// init finance server
 	financeCategoryServer := finance.NewCategoryServer(db)
 	// init finance tag server
-	financeTagServer := finance.NewTagServer(db)
 	financeRecordServer := finance.NewRecordServer(db)
 
 	mux.Handle("/finance/category/", financeCategoryServer)
-	mux.Handle("/finance/tag/", financeTagServer)
 	mux.Handle("/finance/record/", financeRecordServer)
 
 	// start server

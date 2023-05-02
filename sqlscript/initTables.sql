@@ -12,24 +12,16 @@ CREATE TABLE IF NOT EXISTS finance_category (
   created_at TIMESTAMP NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS finance_tags (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR(256) NOT NULL,
-  remarks VARCHAR(256),
-  created_at TIMESTAMP NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS finance_records (
   id SERIAL PRIMARY KEY,
+  date DATE not null,
   name VARCHAR(256) NOT NULL,
   category_id INT NOT NULL,
   currency VARCHAR(256) NOT NULL,
   amount FLOAT NOT NULL,
-  year INT NOT NULL,
-  month INT NOT NULL,
-  tags VARCHAR(256)[] NOT NULL,
+  is_fixed_expense boolean not null,
   remarks VARCHAR(256),
-  created_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (category_id) REFERENCES finance_category (id)
 );
 
