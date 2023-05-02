@@ -79,7 +79,7 @@ const RecordForm: React.FC<PageProps> = ({ params }) => {
   }
 
   async function handleGetRecord(id: number) {
-    const response = await fetch(`${API_URL.finance.record.get}${id}` ?? '')
+    const response = await fetch(`${API_URL.finance.record.get}/${id}` ?? '')
     const data = await response.json()
     setRecord(data)
   }
