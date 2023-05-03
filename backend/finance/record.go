@@ -132,7 +132,7 @@ func queryBuilder(query map[string][]string) string {
                         SUM(amount) AS total_amount
                         FROM finance_records
                         %v 
-                        GROUP BY finance_records.date
+                        GROUP BY TO_CHAR(date, 'YYYY-MM') 
                         ORDER BY name`
 	case "category":
 		queryStr = `SELECT finance_category.name AS name,
@@ -149,7 +149,7 @@ func queryBuilder(query map[string][]string) string {
                     SUM(CASE WHEN NOT is_fixed_expense THEN amount ELSE 0 END) AS non_fixed_expenses
                     FROM finance_records
                     %v
-                    GROUP BY finance_records.date
+                    GROUP BY TO_CHAR(date, 'YYYY-MM')
                     ORDER BY date`
 	default:
 		queryStr = `SELECT r.id, r.name, r.category_id, c.name, is_fixed_expense,
