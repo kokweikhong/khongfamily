@@ -4,8 +4,10 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { IRecord } from "@/types/finance/record";
 import { API_URL } from "@/types/api";
-import FinanceBarChart from "@/components/FinanceBarChart";
-import { PieChart, Pie, Tooltip, Sector, Cell, ResponsiveContainer } from 'recharts';
+import {
+  PieChart, Pie, Tooltip, Sector, Cell, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend
+} from 'recharts';
 
 type FilterDate = {
   from: string;
@@ -16,6 +18,7 @@ const FinancePage = () => {
   const [data, setData] = useState<IRecord[]>([]);
   const [monthlyBarChartData, setMonthlyBarChartData] = useState<any[]>([]);
   const [categoryPieChartData, setCategoryPieChartData] = useState<any[]>([]);
+  const [fixedExpenseBarChartData, setFixedExpenseBarChartData] = useState<any[]>([]);
   const [filterDate, setFilterDate] = useState<FilterDate>({
     // from : today - 3 month and day from 1st day of month and to : today + 1 day 
     from: new Date(new Date().setMonth(new Date().getMonth() - 3)).toISOString().slice(0, 10),
@@ -47,10 +50,18 @@ const FinancePage = () => {
     setCategoryPieChartData(data);
   }
 
+
+  async function getFixedExpenseBarChartData() {
+    const res = await fetch(`${API_URL.finance.record.get}/?group=fixed&from=${filterDate.from}&to=${filterDate.to}` ?? "");
+    const data = await res.json();
+    setFixedExpenseBarChartData(data);
+  }
+
   async function handleGetData() {
     await getMonthlyBarChartData();
     await getRecords();
     await getCategoryPieChartData();
+    await getFixedExpenseBarChartData();
   }
 
   const RADIAN = Math.PI / 180;
@@ -70,13 +81,13 @@ const FinancePage = () => {
 
 
   return (
-    <div>
+    <div className="container mx-auto">
       <h1>Finance Page</h1>
-      <div>
+      <div className="py-5 w-full">
         <Link href="/finance/record/create" className="btn btn-primary">Create</Link>
       </div>
 
-      <div className="flex gap-6 items-center">
+      <div className="flex flex-wrap gap-3 items-center py-5 w-full">
         <div className="flex flex-col">
           <label className="p-2">From Date :</label>
           <input className="p-2" type="date" value={filterDate.from} onChange={(e) => setFilterDate({ ...filterDate, from: e.target.value })} />
@@ -90,11 +101,21 @@ const FinancePage = () => {
 
       <hr />
 
-      <div className="w-full h-80">
-        <FinanceBarChart data={monthlyBarChartData} />
+      <div className="w-full h-[300px] mt-20">
+        <h2 className="mb-4">Overall Monthly Expenses</h2>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart width={150} height={40} data={monthlyBarChartData}>
+            <YAxis />
+            <XAxis dataKey="name" />
+            <Legend />
+            <Bar dataKey="total_amount" fill="#8884d8" />
+            <Tooltip />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
 
-      <div className="w-full h-80">
+      <div className="w-full h-[200px] mt-20">
+        <h2 className="mb-4">Overall Expenses by Category</h2>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart width={400} height={400}>
             <Pie
@@ -116,44 +137,71 @@ const FinancePage = () => {
         </ResponsiveContainer>
       </div>
 
-      {/* data table */}
-      <table className="w-full">
-        <thead>
-          <tr>
-            <th>No</th>
-            <th>Date</th>
-            <th>Name</th>
-            <th>Category</th>
-            <th>Currency</th>
-            <th>Amount</th>
-            <th>IsFixed</th>
-            <th>Remarks</th>
-            <th>Edit</th>
-            <th>Delete</th>
-          </tr>
-        </thead>
+      <div className="w-full h-[200px] mt-20">
+        <h2 className="mb-4">Overall Fixed Expenses</h2>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            width={500}
+            height={300}
+            data={fixedExpenseBarChartData}
+            margin={{
+              top: 5,
+              right: 30,
+              left: 20,
+              bottom: 5,
+            }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="date" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="fixed_expenses" fill="#8884d8" />
+            <Bar dataKey="non_fixed_expenses" fill="#82ca9d" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
 
-        <tbody className="text-center">
-          {data.map((record, index) => (
-            <tr key={record.id}>
-              <td>{index + 1}</td>
-              <td>{record.date}</td>
-              <td>{record.name}</td>
-              <td>{record.category_name}</td>
-              <td>{record.currency}</td>
-              <td>{record.amount}</td>
-              <td>{`${record.isFixedExpense}`}</td>
-              <td>{record.remarks}</td>
-              <td>
-                <Link href={`/finance/record/update/${record.id}`}>Edit</Link>
-              </td>
-              <td>
-                <Link href={`/finance/record/delete/${record.id}`}>Delete</Link>
-              </td>
+      {/* data table */}
+      <div className="overflow-auto w-full mt-20">
+        <table className="w-full">
+          <thead>
+            <tr>
+              <th className="p-4">No</th>
+              <th className="p-4">Date</th>
+              <th className="p-4">Name</th>
+              <th className="p-4">Category</th>
+              <th className="p-4">Currency</th>
+              <th className="p-4">Amount</th>
+              <th className="p-4">IsFixed</th>
+              <th className="p-4">Remarks</th>
+              <th className="p-4">Edit</th>
+              <th className="p-4">Delete</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+
+          <tbody className="text-center">
+            {data.map((record, index) => (
+              <tr key={record.id}>
+                <td className="p-2 whitespace-nowrap">{index + 1}</td>
+                <td className="p-2 whitespace-nowrap">{record.date.split('T')[0]}</td>
+                <td className="p-2 whitespace-nowrap">{record.name}</td>
+                <td className="p-2 whitespace-nowrap">{record.category_name}</td>
+                <td className="p-2 whitespace-nowrap">{record.currency}</td>
+                <td className="p-2 whitespace-nowrap">{record.amount}</td>
+                <td className="p-2 whitespace-nowrap">{`${record.isFixedExpense}`}</td>
+                <td className="p-2 whitespace-nowrap">{record.remarks}</td>
+                <td className="p-2 whitespace-nowrap">
+                  <Link href={`/finance/record/update/${record.id}`}>Edit</Link>
+                </td>
+                <td className="p-2 whitespace-nowrap">
+                  <Link href={`/finance/record/delete/${record.id}`}>Delete</Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
     </div>
 

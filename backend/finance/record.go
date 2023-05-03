@@ -80,7 +80,7 @@ func (s *RecordServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (s *RecordServer) List(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	_, isGroup := query["group"]
-    fmt.Println(isGroup)
+	fmt.Println(isGroup)
 	queryStr := queryBuilder(query)
 
 	// TODO: add filter
@@ -90,27 +90,29 @@ func (s *RecordServer) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer rows.Close()
+	var records interface{}
 	if !isGroup {
-		records, err := withoutQuery(rows)
+		records, err = withoutQuery(rows)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		if err := json.NewEncoder(w).Encode(records); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		return
 	} else if isGroup {
-		records, err := withQueryCategoryAndDate(rows)
+		switch query["group"][0] {
+		case "date", "category":
+			records, err = withQueryCategoryAndDate(rows)
+		case "fixed":
+			records, err = withQueryFixedExpenses(rows)
+		default:
+			records, err = withoutQuery(rows)
+		}
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		if err := json.NewEncoder(w).Encode(records); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	}
+	if err := json.NewEncoder(w).Encode(records); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }
@@ -140,6 +142,15 @@ func queryBuilder(query map[string][]string) string {
                         %v 
                         GROUP BY finance_category.name
                         ORDER BY name`
+	case "fixed":
+		queryStr = `SELECT 
+                    TO_CHAR(date, 'YYYY-MM') AS date,
+                    SUM(CASE WHEN is_fixed_expense THEN amount ELSE 0 END) AS fixed_expenses,
+                    SUM(CASE WHEN NOT is_fixed_expense THEN amount ELSE 0 END) AS non_fixed_expenses
+                    FROM finance_records
+                    %v
+                    GROUP BY finance_records.date
+                    ORDER BY date`
 	default:
 		queryStr = `SELECT r.id, r.name, r.category_id, c.name, is_fixed_expense,
 	               r.currency, r.amount, r.date, r.remarks, r.created_at
@@ -160,8 +171,8 @@ func queryBuilder(query map[string][]string) string {
 			start.UTC().Format("2006-01-02T15:04:05Z"), end.UTC().Format("2006-01-02T15:04:05Z"))
 		queryStr = fmt.Sprintf(queryStr, queryDateStr)
 	} else {
-        queryStr = fmt.Sprintf(queryStr, "")
-    }
+		queryStr = fmt.Sprintf(queryStr, "")
+	}
 	return queryStr
 }
 
@@ -175,6 +186,28 @@ func withQueryCategoryAndDate(rows *sql.Rows) ([]*RecordCategoryAndDate, error) 
 	for rows.Next() {
 		record := new(RecordCategoryAndDate)
 		err := rows.Scan(&record.Name, &record.TotalAmount)
+		if err != nil {
+			return nil, err
+		}
+		records = append(records, record)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return records, nil
+}
+
+type RecordFixedExpenses struct {
+	Date             string  `json:"date"`
+	FixedExpenses    float64 `json:"fixed_expenses"`
+	NonFixedExpenses float64 `json:"non_fixed_expenses"`
+}
+
+func withQueryFixedExpenses(rows *sql.Rows) ([]*RecordFixedExpenses, error) {
+	records := make([]*RecordFixedExpenses, 0)
+	for rows.Next() {
+		record := new(RecordFixedExpenses)
+		err := rows.Scan(&record.Date, &record.FixedExpenses, &record.NonFixedExpenses)
 		if err != nil {
 			return nil, err
 		}

@@ -6,6 +6,7 @@ import { ICategory } from '@/types/finance/category';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { API_URL } from '@/types/api';
+import Link from 'next/link';
 
 type PageProps = {
   params: {
@@ -91,72 +92,77 @@ const RecordForm: React.FC<PageProps> = ({ params }) => {
   }
 
   return (
-    <div className='max-w-[500px] mx-auto'>
-      <form onSubmit={handleSubmit(handleFormSubmit)} className='w-full flex flex-col gap-3'>
+    <div className='container mx-auto'>
+      <div className='p-5'>
+        <Link href='/finance'>Finance Page</Link>
+      </div>
+      <div className='max-w-[500px] mx-auto mt-10'>
+        <form onSubmit={handleSubmit(handleFormSubmit)} className='w-full flex flex-col gap-3'>
 
-        <div className='flex flex-col gap-1'>
-          <label>Date</label>
-          <input type="date" defaultValue={new Date().toISOString().slice(0, 10)} {...register("date", { required: true })} className='rounded-md border border-primary p-2' />
-          {errors.date && <span className='text-red-500 italic'>This field is required</span>}
-        </div>
-
-
-        <div className='flex flex-col gap-1'>
-          <label>Name</label>
-          <input type="text" {...register("name", { required: true })} className='rounded-md border border-primary p-2' />
-          {errors.name && <span className='text-red-500 italic'>This field is required</span>}
-        </div>
-
-        <div className='flex flex-col gap-1'>
-          <label>Category</label>
-          <select {...register("category_id", { valueAsNumber: true, required: true })} className='rounded-md border border-primary p-2'>
-            <option value="">Please Select Category</option>
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>{category.name}</option>
-            ))}
-          </select>
-          {errors.category_id && <span className='text-red-500 italic'>This field is required</span>}
-        </div>
+          <div className='flex flex-col gap-1'>
+            <label>Date</label>
+            <input type="date" defaultValue={new Date().toISOString().slice(0, 10)} {...register("date", { required: true })} className='rounded-md border border-primary p-2' />
+            {errors.date && <span className='text-red-500 italic'>This field is required</span>}
+          </div>
 
 
-        <div className='flex flex-col gap-1'>
-          <label>Currency</label>
-          <select {...register("currency", { required: true })} className='rounded-md border border-primary p-2'>
-            <option value="MYR">MYR</option>
-            <option value="SGD">SGD</option>
-          </select>
-          {errors.currency && <span className='text-red-500 italic'>This field is required</span>}
-        </div>
+          <div className='flex flex-col gap-1'>
+            <label>Name</label>
+            <input type="text" {...register("name", { required: true })} className='rounded-md border border-primary p-2' />
+            {errors.name && <span className='text-red-500 italic'>This field is required</span>}
+          </div>
 
-        <div className='flex flex-col gap-1'>
-          <label>Amount</label>
-          <input type="number" step={0.01} {...register("amount", { valueAsNumber: true, required: true })} className='rounded-md border border-primary p-2' />
-          {errors.amount && <span className='text-red-500 italic'>This field is required</span>}
-        </div>
-
-
-        <div className='flex flex-col gap-1'>
-          <label className='flex gap-4 cursor-pointer text-lg'>
-            <input type="checkbox" {...register("isFixedExpense")} className='rounded-md border border-primary p-2' />
-            Is Fixed Expenses
-          </label>
-        </div>
+          <div className='flex flex-col gap-1'>
+            <label>Category</label>
+            <select {...register("category_id", { valueAsNumber: true, required: true })} className='rounded-md border border-primary p-2'>
+              <option value="">Please Select Category</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>{category.name}</option>
+              ))}
+            </select>
+            {errors.category_id && <span className='text-red-500 italic'>This field is required</span>}
+          </div>
 
 
+          <div className='flex flex-col gap-1'>
+            <label>Currency</label>
+            <select {...register("currency", { required: true })} className='rounded-md border border-primary p-2'>
+              <option value="MYR">MYR</option>
+              <option value="SGD">SGD</option>
+            </select>
+            {errors.currency && <span className='text-red-500 italic'>This field is required</span>}
+          </div>
 
-        <div className='flex flex-col gap-1'>
-          <label>Remarks</label>
-          <input type="text" {...register("remarks")} className='rounded-md border border-primary p-2' />
-        </div>
+          <div className='flex flex-col gap-1'>
+            <label>Amount</label>
+            <input type="number" step={0.01} {...register("amount", { valueAsNumber: true, required: true })} className='rounded-md border border-primary p-2' />
+            {errors.amount && <span className='text-red-500 italic'>This field is required</span>}
+          </div>
+
+
+          <div className='flex flex-col gap-1'>
+            <label className='flex gap-4 cursor-pointer text-lg'>
+              <input type="checkbox" {...register("isFixedExpense")} className='rounded-md border border-primary p-2' />
+              Is Fixed Expenses
+            </label>
+          </div>
 
 
 
-        <button
-          type='submit'
-          className='uppercase rounded-md bg-primary text-white py-2 px-4'
-        >{formId}</button>
+          <div className='flex flex-col gap-1'>
+            <label>Remarks</label>
+            <input type="text" {...register("remarks")} className='rounded-md border border-primary p-2' />
+          </div>
 
-      </form>
+
+
+          <button
+            type='submit'
+            className='uppercase rounded-md bg-primary text-white py-2 px-4'
+          >{formId}</button>
+
+        </form>
+      </div>
     </div>
   );
 };
