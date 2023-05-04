@@ -17,7 +17,6 @@ type PageProps = {
 
 const RecordForm: React.FC<PageProps> = ({ params }) => {
   const { formId, recordId } = params;
-  if (formId !== 'create' && formId !== 'update' && formId !== 'delete') return <div>404</div>
   const [requestURL, setRequestURL] = useState<string>('');
   const [record, setRecord] = useState<IRecord>()
   const [categories, setCategories] = useState<ICategory[]>([]);
@@ -45,7 +44,7 @@ const RecordForm: React.FC<PageProps> = ({ params }) => {
         setRequestURL(`${API_URL.finance.record.delete}/${recordId[0]}` ?? '')
         break;
     }
-  }, []);
+  }, [formId, recordId]);
 
   useEffect(() => {
     if (record) {
@@ -90,6 +89,8 @@ const RecordForm: React.FC<PageProps> = ({ params }) => {
     const data = await response.json()
     setCategories(data)
   }
+
+  if (formId !== 'create' && formId !== 'update' && formId !== 'delete') return <div>404</div>
 
   return (
     <div className='container mx-auto'>

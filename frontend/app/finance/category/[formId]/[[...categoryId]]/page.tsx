@@ -15,7 +15,6 @@ type PageProps = {
 
 const CategoryForm: React.FC<PageProps> = ({ params }) => {
   const { formId, categoryId } = params;
-  if (formId !== 'create' && formId !== 'update' && formId !== 'delete') return <div>404</div>
   const [data, setData] = React.useState<ICategory>();
   const [requestURL, setRequestURL] = React.useState<string>('');
   const router = useRouter();
@@ -41,7 +40,7 @@ const CategoryForm: React.FC<PageProps> = ({ params }) => {
     if (formId === 'update' || formId === 'delete') {
       handleGetCategory(parseInt(categoryId[0]));
     }
-  }, []);
+  }, [formId, categoryId]);
 
   useEffect(() => {
     reset(data);
@@ -52,6 +51,7 @@ const CategoryForm: React.FC<PageProps> = ({ params }) => {
     const data = await response.json();
     setData(data);
   }
+  if (formId !== 'create' && formId !== 'update' && formId !== 'delete') return <div>404</div>
 
   async function handleRequest(formData: ICategory) {
     try {

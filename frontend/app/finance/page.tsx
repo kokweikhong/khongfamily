@@ -20,9 +20,10 @@ const FinancePage = () => {
   const [categoryPieChartData, setCategoryPieChartData] = useState<any[]>([]);
   const [fixedExpenseBarChartData, setFixedExpenseBarChartData] = useState<any[]>([]);
   const [filterDate, setFilterDate] = useState<FilterDate>({
-    // from : today - 3 month and day from 1st day of month and to : today + 1 day 
-    from: new Date(new Date().setMonth(new Date().getMonth() - 3)).toISOString().slice(0, 10),
-    to: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().slice(0, 10),
+    // from : day=1st day of the month month=today month - 12 months
+    from: new Date(new Date().getFullYear() - 1, new Date().getMonth(), 2).toISOString().split('T')[0],
+    // to : today + 1 day
+    to: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 1).toISOString().split('T')[0]
   });
 
   useEffect(() => {
@@ -114,10 +115,10 @@ const FinancePage = () => {
         </ResponsiveContainer>
       </div>
 
-      <div className="w-full h-[200px] mt-20">
+      <div className="w-full h-[400px] mt-20">
         <h2 className="mb-4">Overall Expenses by Category</h2>
         <ResponsiveContainer width="100%" height="100%">
-          <PieChart width={400} height={400}>
+          <PieChart width={600} height={600}>
             <Pie
               data={categoryPieChartData}
               cx="50%"
