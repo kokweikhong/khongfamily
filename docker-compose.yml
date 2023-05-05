@@ -5,12 +5,8 @@ services:
     container_name: khongfamily_frontend
     ports:
       - "3000:3000"
-    volumes:
-      - ./frontend:/app
-    environment:
-      - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://localhost:8080
-
+    env_file:
+      - .frontend.env
     depends_on:
       - backend
       # - reverse-proxy
@@ -21,19 +17,15 @@ services:
       - "8080:8080"
     environment:
       - DB_HOST=database
-      - DB_PORT=5432
-      - DB_USER=khongadmin
-      - DB_PASSWORD=khong1314Family
-      - DB_NAME=khongfamily
+    env_file:
+      - .backend.env
     depends_on:
       - database
   database:
     image: postgres
     container_name: khongfamily_database
-    environment:
-      - POSTGRES_USER=khongadmin
-      - POSTGRES_PASSWORD=khong1314Family
-      - POSTGRES_DB=khongfamily
+    env_file:
+      - .backend.env
     volumes:
       - ./sqlscript/initUser.sql:/docker-entrypoint-initdb.d/initUser.sql
       - ./sqlscript/initTables.sql:/docker-entrypoint-initdb.d/initTables.sql
