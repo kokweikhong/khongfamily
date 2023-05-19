@@ -1,5 +1,6 @@
 import "../styles/main.css";
 import { poppins } from "@/utils/fonts";
+import Header from "@/components/Header";
 
 export const metadata = {
   title: 'Create Next App',
@@ -14,6 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${poppins.variable} font-poppins`}>
+        <Header />
         {children}
       </body>
     </html>

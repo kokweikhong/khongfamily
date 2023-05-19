@@ -3,6 +3,7 @@ services:
   frontend:
     build: ./frontend
     container_name: khongfamily_frontend
+    restart: always
     ports:
       - "3000:3000"
     env_file:
@@ -13,6 +14,7 @@ services:
   backend:
     build: ./backend
     container_name: khongfamily_backend
+    restart: always
     ports:
       - "8080:8080"
     environment:
@@ -23,6 +25,7 @@ services:
       - database
   database:
     image: postgres
+    restart: always
     container_name: khongfamily_database
     env_file:
       - .backend.env
