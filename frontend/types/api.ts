@@ -14,7 +14,7 @@ export interface IAPIUrls {
 }
 
 
-export const API_URL: IAPIUrls = {
+export const API_URL = {
   "finance": {
     "record": {
       "get": `${API_BASE_URL}/finance/record`,
@@ -28,6 +28,11 @@ export const API_URL: IAPIUrls = {
       "update": `${API_BASE_URL}/finance/category/update`,
       "delete": `${API_BASE_URL}/finance/category/delete`,
     },
-  }
+  },
+  "users": {
+    "getUsers": `${API_BASE_URL}/users`,
+    "getByEmail": `${API_BASE_URL}/users/email/`,
+    "registerUser": `${API_BASE_URL}/users/create`,
+  },
 }
 

@@ -8,6 +8,8 @@ import {
   PieChart, Pie, Tooltip, Sector, Cell, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend
 } from 'recharts';
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 type FilterDate = {
   from: string;
@@ -15,6 +17,8 @@ type FilterDate = {
 }
 
 const FinancePage = () => {
+  const { status } = useSession();
+  const router = useRouter();
   const [data, setData] = useState<IRecord[]>([]);
   const [monthlyBarChartData, setMonthlyBarChartData] = useState<any[]>([]);
   const [categoryPieChartData, setCategoryPieChartData] = useState<any[]>([]);
@@ -26,10 +30,14 @@ const FinancePage = () => {
     to: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 1).toISOString().split('T')[0]
   });
 
-  useEffect(() => {
-    handleGetData();
 
-  }, []);
+  useEffect(() => {
+    console.log(status)
+    if (status === "unauthenticated") {
+      router.push("/auth/login");
+    }
+    handleGetData();
+  }, [status]);
 
   async function getRecords() {
     const res = await fetch(`${API_URL.finance.record.get}/?from=${filterDate.from}&to=${filterDate.to}` ?? "")
@@ -37,20 +45,17 @@ const FinancePage = () => {
     setData(data);
   }
 
-
   async function getMonthlyBarChartData() {
     const res = await fetch(`${API_URL.finance.record.get}/?group=date&from=${filterDate.from}&to=${filterDate.to}` ?? "");
     const data = await res.json();
     setMonthlyBarChartData(data);
   }
 
-
   async function getCategoryPieChartData() {
     const res = await fetch(`${API_URL.finance.record.get}/?group=category&from=${filterDate.from}&to=${filterDate.to}` ?? "");
     const data = await res.json();
     setCategoryPieChartData(data);
   }
-
 
   async function getFixedExpenseBarChartData() {
     const res = await fetch(`${API_URL.finance.record.get}/?group=fixed&from=${filterDate.from}&to=${filterDate.to}` ?? "");
@@ -78,17 +83,18 @@ const FinancePage = () => {
     );
   };
 
-
-
+  if (status === "loading") {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="container mx-auto">
       <h1>Finance Page</h1>
-      <div className="py-5 w-full">
+      <div className="w-full py-5">
         <Link href="/finance/record/create" className="btn btn-primary">Create</Link>
       </div>
 
-      <div className="flex flex-wrap gap-3 items-center py-5 w-full">
+      <div className="flex flex-wrap items-center w-full gap-3 py-5">
         <div className="flex flex-col">
           <label className="p-2">From Date :</label>
           <input className="p-2" type="date" value={filterDate.from} onChange={(e) => setFilterDate({ ...filterDate, from: e.target.value })} />
@@ -97,7 +103,7 @@ const FinancePage = () => {
           <label className="p-2">To Date :</label>
           <input className="p-2" type="date" value={filterDate.to} onChange={(e) => setFilterDate({ ...filterDate, to: e.target.value })} />
         </div>
-        <button onClick={handleGetData} className="px-4 py-2 uppercase bg-primary text-white">Get Data</button>
+        <button onClick={handleGetData} className="px-4 py-2 text-white uppercase bg-primary">Get Data</button>
       </div>
 
       <hr />
@@ -164,7 +170,7 @@ const FinancePage = () => {
       </div>
 
       {/* data table */}
-      <div className="overflow-auto w-full mt-20">
+      <div className="w-full mt-20 overflow-auto">
         <table className="w-full">
           <thead>
             <tr>

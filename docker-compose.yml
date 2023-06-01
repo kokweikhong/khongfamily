@@ -6,8 +6,6 @@ services:
     restart: always
     ports:
       - "3000:3000"
-    env_file:
-      - .frontend.env
     depends_on:
       - backend
       # - reverse-proxy
@@ -28,7 +26,7 @@ services:
     restart: always
     container_name: khongfamily_database
     env_file:
-      - .backend.env
+      - .database.env
     volumes:
       - ./sqlscript/initUser.sql:/docker-entrypoint-initdb.d/initUser.sql
       - ./sqlscript/initTables.sql:/docker-entrypoint-initdb.d/initTables.sql

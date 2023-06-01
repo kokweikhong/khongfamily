@@ -10,6 +10,7 @@ import (
 	_ "github.com/lib/pq"
 
 	"github.com/kokweikhong/khongfinance/backend/finance"
+	"github.com/kokweikhong/khongfinance/backend/users"
 )
 
 var (
@@ -41,9 +42,12 @@ func main() {
 	financeCategoryServer := finance.NewCategoryServer(db)
 	// init finance tag server
 	financeRecordServer := finance.NewRecordServer(db)
+    // init user server
+    userServer := users.NewUserServer(db)
 
 	mux.Handle("/finance/category/", financeCategoryServer)
 	mux.Handle("/finance/record/", financeRecordServer)
+    mux.Handle("/users/", userServer)
 
 	// start server
 	log.Fatal(http.ListenAndServe(":8080", mux))
