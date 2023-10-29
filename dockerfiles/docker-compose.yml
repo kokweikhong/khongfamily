@@ -1,0 +1,64 @@
+version: '3.8'
+name: 'khongfamily'
+services:
+  app:
+    build: 
+      context: ./../khongfamily-app
+      dockerfile: ./../dockerfiles/app.dockerfile
+    container_name: khongfamily-app 
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - broker
+    networks:
+      - khongfamily-network
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  broker:
+    build:
+      context: ./../khongfamily-broker
+      dockerfile: ./../dockerfiles/broker.dockerfile
+    container_name: khongfamily-broker
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres 
+    networks:
+      - khongfamily-network
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  postgres:
+    image: postgres:16.0-alpine3.18
+    restart: always
+    container_name: khongfamily-postgres 
+    ports:
+      - "5432:5432"
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      - POSTGRES_USER=khongadmin
+      - POSTGRES_PASSWORD=khong1314Family
+      - POSTGRES_DB=khongfamily
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - khongfamily-network
+  # adminer:
+  #   image: adminer
+  #   restart: always
+  #   ports:
+  #     - 8081:8080
+#
+volumes:
+  pgdata:
+
+networks:
+  khongfamily-network:
+    name: khongfamily-network
