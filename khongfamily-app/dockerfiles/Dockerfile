@@ -27,6 +27,8 @@ COPY . .
 # This will do the trick, use the corresponding env file for each environment.
 # COPY .env.production.sample .env.production
 COPY .env.production .env.production
+# remove any .env.development and .env.local files
+RUN rm -f .env.development .env.local
 # RUN yarn build
 
 # If using npm comment out above and use below instead

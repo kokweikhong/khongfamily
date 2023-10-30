@@ -5,7 +5,7 @@ import Image from "next/image";
 import logo from "@/public/logo_black.png";
 
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
-import { signIn, signOut } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { SearchParams } from "@/types/common";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -42,7 +42,6 @@ export default function Page({ searchParams }: SearchParams) {
 
   return (
     <main>
-      <button onClick={() => signOut()}>Sign Out</button>
       <div className="flex min-h-full flex-1 items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
         <div className="w-full max-w-sm space-y-10">
           <div>
