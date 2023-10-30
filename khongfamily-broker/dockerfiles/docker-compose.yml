@@ -1,0 +1,44 @@
+version: '3.8'
+name: khongfamily_backend
+services:
+  broker:
+    build:
+      context: ../
+      dockerfile: ./dockerfiles/Dockerfile
+    container_name: khongfamily-broker
+    restart: always
+    ports:
+      - "8080:8080"
+    # env_file:
+    #   - ./backend/internal/config/.env
+    depends_on:
+      - database
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  database:
+    image: postgres:16.0-alpine3.18
+    restart: always
+    container_name: khongfamily_database
+    ports:
+      - "5432:5432"
+    # env_file:
+    #   - ./backend/internal/config/.env
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      - POSTGRES_USER=khongadmin
+      - POSTGRES_PASSWORD=khong1314Family
+      - POSTGRES_DB=khongfamily
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  # adminer:
+  #   image: adminer
+  #   restart: always
+  #   ports:
+  #     - 8081:8080
+
+volumes:
+  pgdata:

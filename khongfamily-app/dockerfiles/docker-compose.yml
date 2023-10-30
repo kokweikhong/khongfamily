@@ -1,0 +1,16 @@
+version: '3.8'
+name: "khongfamily_frontend"
+services:
+  frontend:
+    build:
+      context: ../
+      dockerfile: ./dockerfiles/Dockerfile
+    container_name: khongfamily_frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    # depends_on:
+    #   - backend
+    deploy:
+      mode: replicated
+      replicas: 1
