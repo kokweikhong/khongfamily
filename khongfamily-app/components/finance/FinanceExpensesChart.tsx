@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { FinanceExpensesSummary } from "@/types/finance";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
