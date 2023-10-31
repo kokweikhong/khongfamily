@@ -11,6 +11,10 @@ import {
   useFieldArray,
 } from "react-hook-form";
 
+import { useCreateFinanceExpensesRecords } from "@/query/finance";
+
+import Swal from "sweetalert2";
+
 const people = [
   {
     name: "Jane Cooper",
@@ -66,6 +70,7 @@ const categories: { id: number; name: string }[] = [
 ];
 
 const FinanceExpensesMultiForm = () => {
+  const createRecords = useCreateFinanceExpensesRecords();
   const currentDate = new Date().toISOString().slice(0, 10);
   const [records, setRecords] = React.useState<FinanceExpensesRecord[]>([
     {
@@ -104,7 +109,49 @@ const FinanceExpensesMultiForm = () => {
     data,
   ) => {
     console.log(data);
-    // console.log(newData);
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+
+      confirmButtonText: "Yes, submit it!",
+      cancelButtonText: "No, cancel!",
+      reverseButtons: true,
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await createRecords.mutateAsync(data.data);
+          console.log(response);
+          Swal.fire({
+            title: "Submitted!",
+            text: "Your records has been submitted.",
+            icon: "success",
+            timer: 1500,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        } catch (error) {
+          Swal.fire({
+            title: "Error!",
+            text: "Something went wrong.",
+            icon: "error",
+            timer: 1500,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        }
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        Swal.fire({
+          title: "Cancelled",
+          text: "Your records is safe :)",
+          icon: "info",
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        });
+      }
+    });
   };
 
   return (

@@ -18,6 +18,7 @@ type FinanceExpensesRecord interface {
 	List(w http.ResponseWriter, r *http.Request)
 	Get(w http.ResponseWriter, r *http.Request)
 	Create(w http.ResponseWriter, r *http.Request)
+	InsertMany(w http.ResponseWriter, r *http.Request)
 	Update(w http.ResponseWriter, r *http.Request)
 	Delete(w http.ResponseWriter, r *http.Request)
 	GetFinanceExpensesSummary(w http.ResponseWriter, r *http.Request)
@@ -109,6 +110,26 @@ func (h *financeExpensesRecord) Create(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(record)
 }
 
+func (h *financeExpensesRecord) InsertMany(w http.ResponseWriter, r *http.Request) {
+	records := []*model.FinanceExpensesRecord{}
+	if err := h.ResponseHandler.ReadJSON(w, r, &records); err != nil {
+		slog.Error("Error reading body", "error", err)
+		h.ResponseHandler.ErrorJSON(w, fmt.Errorf("Error reading body: %w", err), http.StatusBadRequest)
+		return
+	}
+
+	service := service.NewFinanceExpensesRecordService()
+	if err := service.InsertMany(records); err != nil {
+		slog.Error("Error inserting records", "error", err)
+		h.ResponseHandler.ErrorJSON(w, fmt.Errorf("Error inserting records: %w", err), http.StatusInternalServerError)
+		return
+	}
+
+	slog.Info("Records inserted", "records", records)
+
+	h.ResponseHandler.WriteJSON(w, http.StatusOK, records)
+}
+
 func (h *financeExpensesRecord) Update(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	if idStr == "" {
@@ -174,7 +195,7 @@ func (h *financeExpensesRecord) GetFinanceExpensesSummary(w http.ResponseWriter,
 	records, err := service.List(period)
 	if err != nil {
 		slog.Error("Error listing records", "error", err)
-        h.ResponseHandler.ErrorJSON(w, fmt.Errorf("Error listing records: %w", err), http.StatusInternalServerError)
+		h.ResponseHandler.ErrorJSON(w, fmt.Errorf("Error listing records: %w", err), http.StatusInternalServerError)
 		// http.Error(w, "Error listing records", http.StatusInternalServerError)
 		return
 	}
@@ -184,14 +205,14 @@ func (h *financeExpensesRecord) GetFinanceExpensesSummary(w http.ResponseWriter,
 	data, err := financeExpensesUtils.GetFinanceExpensesSummary(records)
 	if err != nil {
 		slog.Error("Error getting finance expenses summary", "error", err)
-        h.ResponseHandler.ErrorJSON(w, fmt.Errorf("Error getting finance expenses summary: %w", err), http.StatusInternalServerError)
+		h.ResponseHandler.ErrorJSON(w, fmt.Errorf("Error getting finance expenses summary: %w", err), http.StatusInternalServerError)
 		// http.Error(w, "Error getting finance expenses summary", http.StatusInternalServerError)
 		return
 	}
 
 	slog.Info("Finance expenses summary", "data", data)
 
-    h.ResponseHandler.WriteJSON(w, http.StatusOK, data)
+	h.ResponseHandler.WriteJSON(w, http.StatusOK, data)
 }
 
 func (h *financeExpensesCategory) List(w http.ResponseWriter, r *http.Request) {

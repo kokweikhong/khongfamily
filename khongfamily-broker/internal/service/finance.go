@@ -6,12 +6,14 @@ import (
 
 	"github.com/kokweikhong/khongfamily-broker/internal/db"
 	"github.com/kokweikhong/khongfamily-broker/internal/model"
+	"github.com/lib/pq"
 )
 
 type FinanceExpensesRecordService interface {
 	List(period string) ([]*model.FinanceExpensesRecord, error)
 	Get(id int) (*model.FinanceExpensesRecord, error)
 	Create(record *model.FinanceExpensesRecord) error
+	InsertMany(records []*model.FinanceExpensesRecord) error
 	Update(record *model.FinanceExpensesRecord) error
 	Delete(id int) error
 }
@@ -186,6 +188,70 @@ func (s *financeExpensesRecordService) Create(record *model.FinanceExpensesRecor
 	}
 
 	slog.Info("Completed creating finance expenses record", "record", record)
+
+	return nil
+}
+
+func (*financeExpensesRecordService) InsertMany(records []*model.FinanceExpensesRecord) error {
+	db := db.GetDB()
+
+	tx, err := db.Begin()
+	if err != nil {
+		slog.Error("Error beginning transaction", "error", err)
+		return err
+	}
+
+	defer tx.Rollback()
+
+	// CopyIn inserts multiple records in a single query
+	stmt, err := tx.Prepare(pq.CopyIn("finance_expenses_records",
+		"date", "name", "category_id", "currency", "amount", "is_fixed_expenses", "is_paid", "remarks",
+		"created_at", "updated_at"))
+	if err != nil {
+		slog.Error("Error preparing statement", "error", err)
+		return err
+	}
+
+	currentTime := time.Now()
+
+	for _, record := range records {
+		_, err = stmt.Exec(
+			record.Date,
+			record.Name,
+			record.CategoryID,
+			record.Currency,
+			record.Amount,
+			record.IsFixedExpenses,
+			record.IsPaid,
+			record.Remarks,
+			currentTime,
+			currentTime,
+		)
+		if err != nil {
+			slog.Error("Error executing statement", "error", err)
+			return err
+		}
+	}
+
+	_, err = stmt.Exec()
+	if err != nil {
+		slog.Error("Error executing statement", "error", err)
+		return err
+	}
+
+	err = stmt.Close()
+	if err != nil {
+		slog.Error("Error closing statement", "error", err)
+		return err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		slog.Error("Error committing transaction", "error", err)
+		return err
+	}
+
+	slog.Info("Completed inserting finance expenses records", "records", len(records))
 
 	return nil
 }

@@ -1,3 +1,5 @@
+import React from "react";
+
 import FinanceExpensesMultiForm from "@/components/finance/FinanceExpensesMultiForm";
 
 export default function Page() {

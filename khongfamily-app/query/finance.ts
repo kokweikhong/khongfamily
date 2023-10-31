@@ -7,7 +7,6 @@ import {
 } from "../types/finance";
 import { authOptions } from "@/lib/auth";
 import { getSession } from "next-auth/react";
-import { use } from "react";
 
 // const apiURL = process.env.NEXT_PUBLIC_API_URL;
 const apiURL = "http://localhost:8080";
@@ -117,6 +116,34 @@ export function useCreateFinanceExpensesRecord() {
   });
 }
 
+export async function createFinanceExpensesRecords(
+  records: FinanceExpensesRecord[],
+): Promise<FinanceExpensesRecord[]> {
+  const accessToken = await getAccessToken();
+  const { data } = await financeExpensesAPI.post(
+    "/records/insert-many",
+    records,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+  );
+  return data;
+}
+
+export function useCreateFinanceExpensesRecords() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (records: FinanceExpensesRecord[]) =>
+      createFinanceExpensesRecords(records),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["financeExpensesRecords"]);
+      queryClient.invalidateQueries(["financeExpensesSummary"]);
+    },
+  });
+}
+
 export async function updateFinanceExpensesRecord(
   record: FinanceExpensesRecord,
 ): Promise<FinanceExpensesRecord> {
@@ -138,7 +165,7 @@ export function useUpdateFinanceExpensesRecord() {
   return useMutation({
     mutationFn: (record: FinanceExpensesRecord) =>
       updateFinanceExpensesRecord(record),
-    onSuccess: (record) => {
+    onSuccess: (record: FinanceExpensesRecord) => {
       queryClient.invalidateQueries(["financeExpensesRecords"]);
       queryClient.invalidateQueries(["financeExpensesSummary"]);
       queryClient.invalidateQueries(["financeExpensesRecord", record.id]);
@@ -253,7 +280,7 @@ export function useUpdateFinanceExpensesCategory() {
   return useMutation({
     mutationFn: (category: FinanceExpensesCategory) =>
       updateFinanceExpensesCategory(category),
-    onSuccess: (category) => {
+    onSuccess: (category: FinanceExpensesCategory) => {
       queryClient.invalidateQueries(["financeExpensesCategories"]);
       queryClient.invalidateQueries(["financeExpensesCategory", category.id]);
     },

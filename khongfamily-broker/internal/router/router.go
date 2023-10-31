@@ -72,6 +72,7 @@ func setupFinanceExpensesRouter() *chi.Mux {
 			r.Get("/", expenses.List)
 			r.Get("/{id}", expenses.Get)
 			r.Post("/", expenses.Create)
+			r.Post("/insert-many", expenses.InsertMany)
 			r.Put("/{id}", expenses.Update)
 			r.Delete("/{id}", expenses.Delete)
 		})
