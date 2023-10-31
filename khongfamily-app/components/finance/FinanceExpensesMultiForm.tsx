@@ -11,66 +11,16 @@ import {
   useFieldArray,
 } from "react-hook-form";
 
-import { useCreateFinanceExpensesRecords } from "@/query/finance";
+import {
+  useCreateFinanceExpensesRecords,
+  useFinanceExpensesCategories,
+} from "@/query/finance";
 
 import Swal from "sweetalert2";
 
-const people = [
-  {
-    name: "Jane Cooper",
-    title: "Regional Paradigm Technician",
-    role: "Admin",
-    email: "janecooper@example.com",
-    telephone: "+1-202-555-0170",
-    imageUrl:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=4&w=256&h=256&q=60",
-  },
-  {
-    name: "Jane Cooper",
-    title: "Regional Paradigm Technician",
-    role: "Admin",
-    email: "janecooper@example.com",
-    telephone: "+1-202-555-0170",
-    imageUrl:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=4&w=256&h=256&q=60",
-  },
-  {
-    name: "Jane Cooper",
-    title: "Regional Paradigm Technician",
-    role: "Admin",
-    email: "janecooper@example.com",
-    telephone: "+1-202-555-0170",
-    imageUrl:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=4&w=256&h=256&q=60",
-  },
-  {
-    name: "Jane Cooper",
-    title: "Regional Paradigm Technician",
-    role: "Admin",
-    email: "janecooper@example.com",
-    telephone: "+1-202-555-0170",
-    imageUrl:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=4&w=256&h=256&q=60",
-  },
-  {
-    name: "Jane Cooper",
-    title: "Regional Paradigm Technician",
-    role: "Admin",
-    email: "janecooper@example.com",
-    telephone: "+1-202-555-0170",
-    imageUrl:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=4&w=256&h=256&q=60",
-  },
-];
-
-const categories: { id: number; name: string }[] = [
-  { id: 0, name: "category 0" },
-  { id: 1, name: "category 1" },
-  { id: 2, name: "category 2" },
-];
-
 const FinanceExpensesMultiForm = () => {
   const createRecords = useCreateFinanceExpensesRecords();
+  const categories = useFinanceExpensesCategories();
   const currentDate = new Date().toISOString().slice(0, 10);
   const [records, setRecords] = React.useState<FinanceExpensesRecord[]>([
     {
@@ -153,6 +103,9 @@ const FinanceExpensesMultiForm = () => {
       }
     });
   };
+
+  if (categories.isLoading) return <div>Loading...</div>;
+  if (categories.isError) return <div>{`${categories.error}`}</div>;
 
   return (
     <div>
@@ -372,7 +325,8 @@ const FinanceExpensesMultiForm = () => {
                             field.onChange(parseInt(e.target.value));
                           }}
                         >
-                          {categories.map((category) => (
+                          <option value={-1}>Select Category</option>
+                          {categories?.data?.map((category) => (
                             <option key={category.id} value={category.id}>
                               {category.name}
                             </option>
