@@ -141,7 +141,7 @@ INSERT INTO "finance_expenses_records" ("date", "name", "category_id", "currency
   ('2023-10-10', 'Mummy Glasses', 10, 'MYR', 200, 'f', 't', '', '2023-10-10 09:10:57.966487', '2023-10-10 09:10:57.966487'),
   ('2023-10-10', 'WD5840A Servicing', 10, 'MYR', 248, 'f', 't', '', '2023-10-10 09:11:42.995601', '2023-10-10 09:11:42.995601');
 
-INSERT INTO "users" ("username", "password", "first_name", "last_name,email", "role", "profile_image", "is_verified", "created_at", "updated_at") 
+INSERT INTO "users" ("username", "password", "first_name", "last_name", "email", "role", "profile_image", "is_verified", "created_at", "updated_at") 
 VALUES ('kokwei','$2a$10$jh8OG2WQzA07tqa/qf4dMuk9XHC/lIv0wjwxS1gm9yv9g5J0IfeXS','Kok Wei','Khong','kokweikhong@gmail.com','admin','',false,'2023-10-30 00:00:00','2023-10-30 00:00:00'),
   ('cheelai','$2a$10$7hBTXJ0H07m.L8bgnYX0Ce/fgthmoNA7S50/2TkfhX9sSKg2RORFK','Chee Lai','Kiang','cheelaikiang@gmail.com','admin','',false,'2023-10-30 00:00:00','2023-10-30 00:00:00');
 
