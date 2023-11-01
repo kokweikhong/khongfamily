@@ -9,14 +9,12 @@ import { authOptions } from "@/lib/auth";
 import { getSession } from "next-auth/react";
 
 // const apiURL = process.env.NEXT_PUBLIC_API_URL;
-const apiURL = "http://localhost:8080";
+const isServer = typeof window === "undefined";
+const apiURL = isServer
+  ? "http://khongfamily-broker:8080"
+  : "http://localhost:8080";
 
 console.log(apiURL);
-console.log(process.env.API_URL);
-
-// type AuthHeader = {
-//   Authorization: string;
-// };
 
 async function getAccessToken(): Promise<string> {
   const session = await getSession();

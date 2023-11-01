@@ -22,9 +22,6 @@ async function refreshAccessToken(token: any) {
 
   const authUser = await res.json();
 
-  // console.log("REFRESH TOKEN AUTH USER")
-  // console.log(authUser)
-
   return {
     ...token,
     accessToken: authUser.accessToken,
@@ -45,8 +42,6 @@ export const authOptions: AuthOptions = {
       },
       async authorize(credentials, req) {
         // Add logic here to look up the user from the credentials supplied
-        console.log(credentials);
-        console.log(`${process.env.NEXT_PUBLIC_API_URL}/users/signin`);
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/users/signin`,
           {
@@ -55,10 +50,7 @@ export const authOptions: AuthOptions = {
             headers: { "Content-Type": "application/json" },
           },
         );
-        console.log(res);
         const user = await res.json();
-        // console.log(user)
-        // const user = { id: 1, name: "J Smith", email: "jsm@gmail.com" }
         if (user) {
           return user;
         } else {
@@ -74,10 +66,6 @@ export const authOptions: AuthOptions = {
   callbacks: {
     async jwt({ token, user, account }) {
       token = { ...token, ...user };
-      // console.log("JWT")
-      // console.log(token)
-      console.log(Date.now() - 5000);
-      console.log((token.accessTokenExpiry as unknown as number) * 1000);
       if (
         Date.now() - 5000 <
         (token.accessTokenExpiry as unknown as number) * 1000
