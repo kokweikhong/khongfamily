@@ -7,7 +7,6 @@ import {
 } from "@/query/finance";
 import FinanceExpensesTable from "@/components/finance/FinanceExpensesTable";
 import FinanceExpensesChart from "@/components/finance/FinanceExpensesChart";
-import { FinanceExpensesSummary } from "@/types/finance";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 import {
@@ -19,23 +18,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 export default function Page() {
-  // const { data: session } = useSession();
   const [period, setPeriod] = React.useState("1y");
-  // console.log(session?.user?.accessToken);
   const financeExpensesRecords = useFinanceExpensesRecords(period);
   const financeExpensesSummary = useFinanceExpensesSummary(period);
   const periods = ["1m", "2m", "3m", "6m", "1y", "2y", "3y"];
-
-  // React.useEffect(() => {
-  //   if (!session?.user.accessToken) {
-  //     return;
-  //   }
-  //   financeExpensesSummary.refetch();
-  // }, [financeExpensesSummary, period, session?.user?.accessToken]);
 
   if (financeExpensesSummary.isLoading || financeExpensesRecords.isLoading) {
     return <div>Loading...</div>;
@@ -92,6 +81,11 @@ export default function Page() {
   return (
     <main className="container px-4">
       <h1>Finance</h1>
+      <div className="my-4">
+        <button className="relative inline-flex items-center rounded-l-md bg-white px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10">
+          <Link href={"/finance/expenses-category"}>Expenses Category</Link>
+        </button>
+      </div>
       <Card className="mb-4 bg-[rgb(243,244,246)]">
         <CardHeader>
           <CardTitle className="text-base font-semibold leading-6 text-gray-900">

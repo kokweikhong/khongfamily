@@ -5,14 +5,13 @@ import {
   FinanceExpensesSummary,
   FinanceExpensesCategory,
 } from "../types/finance";
-import { authOptions } from "@/lib/auth";
 import { getSession } from "next-auth/react";
 
-// const apiURL = process.env.NEXT_PUBLIC_API_URL;
-const isServer = typeof window === "undefined";
-const apiURL = isServer
-  ? "http://khongfamily-broker:8080"
-  : "http://localhost:8080";
+const apiURL = process.env.NEXT_PUBLIC_API_URL;
+// const isServer = typeof window === "undefined";
+// const apiURL = isServer
+//   ? "http://khongfamily-broker:8080"
+//   : "http://localhost:8080";
 
 console.log(apiURL);
 
