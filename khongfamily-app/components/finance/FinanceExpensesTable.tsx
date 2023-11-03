@@ -126,6 +126,27 @@ const FinanceExpensesTable: React.FC<FinanceExpensesTableProps> = ({
   const [formType, setFormType] = React.useState<"create" | "update">("create");
   const deleteFinanceExpensesRecord = useDeleteFinanceExpensesRecord();
 
+  function handleDeleteRecord(id: number) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: `Yes, delete record #${id}!`,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteFinanceExpensesRecord.mutate(id);
+        if (deleteFinanceExpensesRecord.isSuccess) {
+          Swal.fire("Deleted!", "Your file has been deleted.", "success");
+        } else if (deleteFinanceExpensesRecord.isError) {
+          Swal.fire("Error!", "Something went wrong.", "error");
+        }
+      }
+    });
+  }
+
   const columns = [
     columnHelper.display({
       id: "actions",
@@ -221,27 +242,6 @@ const FinanceExpensesTable: React.FC<FinanceExpensesTableProps> = ({
 
     debugTable: true,
   });
-
-  function handleDeleteRecord(id: number) {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: `Yes, delete record #${id}!`,
-    }).then((result) => {
-      if (result.isConfirmed) {
-        deleteFinanceExpensesRecord.mutate(id);
-        if (deleteFinanceExpensesRecord.isSuccess) {
-          Swal.fire("Deleted!", "Your file has been deleted.", "success");
-        } else if (deleteFinanceExpensesRecord.isError) {
-          Swal.fire("Error!", "Something went wrong.", "error");
-        }
-      }
-    });
-  }
 
   return (
     <React.Fragment>

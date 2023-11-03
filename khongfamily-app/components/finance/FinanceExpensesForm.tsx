@@ -48,63 +48,110 @@ const FinanceExpensesRecordForm: React.FC<FinanceExpensesRecordFormProps> = (
     console.log(data);
     props.setOpenForm(false);
 
-    if (props.formType === "create") {
-      createFinanceExpensesRecordMutation.mutate(data);
-    } else if (props.formType === "update") {
-      updateFinanceExpensesRecordMutation.mutate(data);
-    }
+    // if (props.formType === "create") {
+    //   createFinanceExpensesRecordMutation.mutate(data);
+    // } else if (props.formType === "update") {
+    //   updateFinanceExpensesRecordMutation.mutate(data);
+    // }
+
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+
+      confirmButtonText: "Yes, submit it!",
+      cancelButtonText: "No, cancel!",
+      reverseButtons: true,
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          if (props.formType === "create") {
+            await createFinanceExpensesRecordMutation.mutateAsync(data);
+          } else if (props.formType === "update") {
+            await updateFinanceExpensesRecordMutation.mutateAsync(data);
+          }
+          Swal.fire({
+            title: "Submitted!",
+            text: "Your records has been submitted.",
+            icon: "success",
+            timer: 1500,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        } catch (error) {
+          Swal.fire({
+            title: "Error!",
+            text: "Something went wrong.",
+            icon: "error",
+            timer: 1500,
+            timerProgressBar: true,
+            showConfirmButton: false,
+          });
+        }
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        Swal.fire({
+          title: "Cancelled",
+          text: "Your records is safe :)",
+          icon: "info",
+          timer: 1500,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        });
+      }
+    });
 
     form.reset({ name: "" });
   };
 
-  React.useEffect(() => {
-    if (createFinanceExpensesRecordMutation.isSuccess) {
-      Swal.fire({
-        title: "Success",
-        text: "Finance Expenses Record created",
-        icon: "success",
-      });
-    }
-    if (createFinanceExpensesRecordMutation.isError) {
-      Swal.fire({
-        title: "Error",
-        text: "Finance Expenses Record not created",
-        icon: "error",
-      });
-    }
-    if (updateFinanceExpensesRecordMutation.isSuccess) {
-      Swal.fire({
-        title: "Success",
-        text: "Finance Expenses Record updated",
-        icon: "success",
-      });
-    }
-    if (updateFinanceExpensesRecordMutation.isError) {
-      Swal.fire({
-        title: "Error",
-        text: "Finance Expenses Record not updated",
-        icon: "error",
-      });
-    }
-    if (deleteFinanceExpensesRecordMutation.isSuccess) {
-      Swal.fire({
-        title: "Success",
-        text: "Finance Expenses Record deleted",
-        icon: "success",
-      });
-    }
-    if (deleteFinanceExpensesRecordMutation.isError) {
-      Swal.fire({
-        title: "Error",
-        text: "Finance Expenses Record not deleted",
-        icon: "error",
-      });
-    }
-  }, [
-    createFinanceExpensesRecordMutation,
-    updateFinanceExpensesRecordMutation,
-    deleteFinanceExpensesRecordMutation,
-  ]);
+  // React.useEffect(() => {
+  //   if (createFinanceExpensesRecordMutation.isSuccess) {
+  //     Swal.fire({
+  //       title: "Success",
+  //       text: "Finance Expenses Record created",
+  //       icon: "success",
+  //     });
+  //   }
+  //   if (createFinanceExpensesRecordMutation.isError) {
+  //     Swal.fire({
+  //       title: "Error",
+  //       text: "Finance Expenses Record not created",
+  //       icon: "error",
+  //     });
+  //   }
+  //   if (updateFinanceExpensesRecordMutation.isSuccess) {
+  //     Swal.fire({
+  //       title: "Success",
+  //       text: "Finance Expenses Record updated",
+  //       icon: "success",
+  //     });
+  //   }
+  //   if (updateFinanceExpensesRecordMutation.isError) {
+  //     Swal.fire({
+  //       title: "Error",
+  //       text: "Finance Expenses Record not updated",
+  //       icon: "error",
+  //     });
+  //   }
+  //   if (deleteFinanceExpensesRecordMutation.isSuccess) {
+  //     Swal.fire({
+  //       title: "Success",
+  //       text: "Finance Expenses Record deleted",
+  //       icon: "success",
+  //     });
+  //   }
+  //   if (deleteFinanceExpensesRecordMutation.isError) {
+  //     Swal.fire({
+  //       title: "Error",
+  //       text: "Finance Expenses Record not deleted",
+  //       icon: "error",
+  //     });
+  //   }
+  // }, [
+  //   createFinanceExpensesRecordMutation,
+  //   updateFinanceExpensesRecordMutation,
+  //   deleteFinanceExpensesRecordMutation,
+  // ]);
 
   React.useEffect(() => {
     if (props.formType === "create") {
