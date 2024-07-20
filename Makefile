@@ -13,21 +13,23 @@ pgweb:
 	@echo "Starting pgweb..."
 	@pgweb --url $(POSTGRES_DSN)
 
+DB_MIGRATE_DIR=databases/migrations
+
 migrate-create:
 	@echo "Creating migration..."
-	@migrate create -ext sql -dir migrations $(name)
+	@migrate create -ext sql -dir $(DB_MIGRATE_DIR) -seq $(name)
 
 migrate-up:
 	@echo "Migrating up..."
-	@migrate -database $(POSTGRES_DSN) -path migrations up
+	@migrate -database $(POSTGRES_DSN) -path $(DB_MIGRATE_DIR) up
 
 migrate-down:
 	@echo "Migrating down..."
-	@migrate -database $(POSTGRES_DSN) -path migrations down
+	@migrate -database $(POSTGRES_DSN) -path $(DB_MIGRATE_DIR) down
 
 migrate-force:
 	@echo "Forcing migration..."
-	@migrate -database $(POSTGRES_DSN) -path migrations force $(version)
+	@migrate -database $(POSTGRES_DSN) -path $(DB_MIGRATE_DIR) force $(version)
 
 DOCKER_COMPOSE_FILE=deployments/docker-compose.yml
 
