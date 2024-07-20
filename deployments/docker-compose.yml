@@ -1,0 +1,27 @@
+name: "khongfamily"
+services:
+  # web:
+  #   build: .
+  #   command: python manage.py runserver
+
+  postgres:
+    image: postgres:16.3-alpine3.20
+    container_name: khongfamily-postgres
+    environment:
+      POSTGRES_USER: admin@khongfamily
+      POSTGRES_PASSWORD: kkw.2024@Khongfamily
+      POSTGRES_DB: khongfamily
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - khongfamily
+    restart: always
+
+volumes:
+  postgres_data:
+
+networks:
+  khongfamily:
+    driver: bridge
