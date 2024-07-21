@@ -37,8 +37,8 @@ func (a *appTemplate) registerExpensesTemplates(templates map[string]*template.T
 	templates["expenses.html"] = template.Must(
 		template.ParseFS(
 			web.GetViews(),
-			"views/expenses.html",
 			"views/partials/base.html",
+			"views/expenses.html",
 		),
 	)
 }
