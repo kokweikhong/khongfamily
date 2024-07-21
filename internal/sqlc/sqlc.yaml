@@ -8,3 +8,12 @@ sql:
         package: "users"
         out: "users"
         sql_package: "pgx/v5"
+
+  - engine: "postgresql"
+    queries: "expenses/expenses.query.sql"
+    schema: "../../database/migrations"
+    gen:
+      go:
+        package: "expenses"
+        out: "expenses"
+        sql_package: "pgx/v5"
